@@ -3,11 +3,13 @@ import { UserModel } from "@/models/User";
 import { NextResponse, NextRequest } from "next/server";
 import bcrypt from "bcrypt";
 import jsonwebtoken from "jsonwebtoken";
-import { userSchema } from "@/schema/UserValidate";
+import { signupSchema } from "@/schema/UserValidate";
 
 export async function POST(req: NextRequest) {
   try {
     await dbConnection();
+    // console.log(req);
+
     const { email, password, confirmPassword } = await req.json();
 
     // if (!email || !password) {
@@ -17,15 +19,19 @@ export async function POST(req: NextRequest) {
     //   );
     // }
 
-    const validate = userSchema.safeParse({ email, password, confirmPassword });
+    const validate = signupSchema.safeParse({
+      email,
+      password,
+      confirmPassword,
+    });
     if (!validate.success) {
       return NextResponse.json({ error: validate.error }, { status: 400 });
     }
 
     if (password != confirmPassword) {
       return NextResponse.json(
-        {error: "Password don't match"},
-        {status: 400 }
+        { error: "Password don't match" },
+        { status: 400 }
       );
     }
 
@@ -49,10 +55,12 @@ export async function POST(req: NextRequest) {
       { expiresIn: "1h" }
     );
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       { message: "User registered successfully", token },
       { status: 201 }
     );
+
+    return response;
   } catch (error) {
     return NextResponse.json(
       { error: "Something went wrong" },

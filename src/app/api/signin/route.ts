@@ -1,6 +1,6 @@
 import dbConnection from "@/lib/db";
 import { UserModel } from "@/models/User";
-import { userSchema } from "@/schema/UserValidate";
+import { signinSchema } from "@/schema/UserValidate";
 import { NextRequest, NextResponse } from "next/server";
 import bycrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     await dbConnection();
     const { email, password } = await req.json();
 
-    const validate = userSchema.safeParse({ email, password });
+    const validate = signinSchema.safeParse({ email, password });
     if (!validate.success) {
       return NextResponse.json(
         {
