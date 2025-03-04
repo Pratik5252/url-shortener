@@ -1,16 +1,27 @@
 import z from "zod";
 
-const userSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  confirmPassword: z.string().min(6).optional(),
-  url: z.array(z.string().uuid()).optional(),
+const userBaseSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
+const signupSchema = userBaseSchema
+  .extend({
+    confirmPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+const signinSchema = userBaseSchema;
+
 const urlSchema = z.object({
-  url: z.string().url(),
+  url: z.string().url("Please enter a valid URL"),
   shorturl: z.string(),
   updatedAt: z.date().optional(),
 });
 
-export { userSchema, urlSchema };
+export { signinSchema, signupSchema, urlSchema };
